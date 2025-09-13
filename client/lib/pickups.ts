@@ -47,7 +47,7 @@ export async function createPickup(input: Omit<Pickup, 'id'|'status'|'created_at
     waste_type: input.waste_type,
     pickup_date: input.pickup_date,
     description: input.description,
-    status: 'requested',
+    status: 'scheduled',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
