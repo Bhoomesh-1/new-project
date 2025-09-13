@@ -25,8 +25,14 @@ export default function BuyBackPage() {
   useEffect(() => { load(); }, []);
 
   const submit = async () => {
-    await createBuybackOrder({ user_id: user?.id || 'mock-user-1', material_type: material, weight_kg: weight });
+    const order = await createBuybackOrder({ user_id: user?.id || 'mock-user-1', material_type: material, weight_kg: weight });
     await load();
+    if (sb && user?.id) {
+      try {
+        const pts = Math.max(1, Math.round(order.price_quote / 10));
+        await awardPoints(user.id, pts, `Buy-back order for ${order.material_type}`);
+      } catch {}
+    }
     toast({ title: 'Order created', description: `Quote: ₹${quote}` });
   };
 
