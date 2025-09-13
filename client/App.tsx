@@ -29,6 +29,9 @@ import WastePickup from "./pages/WastePickup";
 import ReportIssue from "./pages/ReportIssue";
 import MessagesPage from "./pages/Messages";
 import SettingsPage from "./pages/Settings";
+import MarketplacePage from "./pages/Marketplace";
+import SellItemPage from "./pages/SellItem";
+import ListingDetailPage from "./pages/ListingDetail";
 
 // Import components
 import DashboardLayout from "./components/DashboardLayout";
@@ -286,6 +289,36 @@ const App = () => {
                     <ProtectedRoute>
                       <AppLayout>
                         <BuyBackPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/marketplace"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <MarketplacePage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/sell-item"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <SellItemPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/listing/:id"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <ListingDetailPage />
                       </AppLayout>
                     </ProtectedRoute>
                   }
