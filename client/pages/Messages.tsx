@@ -5,6 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { getAIReply } from '@/lib/ai-chat';
 
 export default function MessagesPage() {
   const { user } = useAuth();
