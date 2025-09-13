@@ -13,6 +13,7 @@ export default function BuyBackPage() {
   const [material, setMaterial] = useState<MaterialType>('plastic');
   const [weight, setWeight] = useState(1);
   const [orders, setOrders] = useState<BuybackOrder[]>([]);
+  const { toast } = useToast();
   const quote = getPriceQuote(material, weight);
 
   const load = async () => {
