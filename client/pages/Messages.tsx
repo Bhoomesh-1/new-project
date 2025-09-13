@@ -25,9 +25,17 @@ export default function MessagesPage() {
 
   const onSend = async () => {
     if (!text.trim()) return;
-    await sendMessage({ pickup_id: pickupId, from_user_id: user?.id || 'mock-user-1', to_user_id: null, body: text.trim() });
+    const content = text.trim();
+    await sendMessage({ pickup_id: pickupId, from_user_id: user?.id || 'mock-user-1', to_user_id: 'worker-bot', body: content });
     setText('');
     await load();
+    // Get AI worker auto-reply
+    const context = pickupId ? `Pickup ID: ${pickupId}.` : undefined;
+    const reply = await getAIReply(content, context);
+    if (reply) {
+      await sendMessage({ pickup_id: pickupId, from_user_id: 'worker-bot', to_user_id: user?.id || 'mock-user-1', body: reply });
+      await load();
+    }
   };
 
   return (
