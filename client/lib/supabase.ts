@@ -275,6 +275,7 @@ export const useAuth = () => {
         app_metadata: { provider: "email" },
         user_metadata: { full_name: email.split("@")[0] },
       };
+      try { localStorage.setItem("ecosort_mock_user", JSON.stringify(mock)); } catch {}
       setUser(mock as User);
       setSession(null);
       return { user: mock, session: null } as any;
@@ -309,6 +310,7 @@ export const useAuth = () => {
           full_name: metadata?.full_name || email.split("@")[0],
         },
       };
+      try { localStorage.setItem("ecosort_mock_user", JSON.stringify(mock)); } catch {}
       setUser(mock as User);
       setSession(null);
       return { user: mock, session: null } as any;
@@ -388,6 +390,7 @@ export const useAuth = () => {
       // Mock sign out: clear local state
       setUser(null);
       setSession(null);
+      try { localStorage.removeItem("ecosort_mock_user"); } catch {}
       return;
     }
 
