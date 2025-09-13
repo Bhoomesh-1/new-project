@@ -78,6 +78,18 @@ const navigationItems = [
     description: "Sell recyclables",
   },
   {
+    title: "Marketplace",
+    href: "/marketplace",
+    icon: ShoppingBag,
+    description: "Second-hand items",
+  },
+  {
+    title: "Sell Item",
+    href: "/sell-item",
+    icon: TrendingUp,
+    description: "List your item",
+  },
+  {
     title: "Eco-Points & Rewards",
     href: "/rewards",
     icon: Award,
