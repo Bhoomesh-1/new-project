@@ -181,6 +181,14 @@ export const useAuth = () => {
 
   useEffect(() => {
     if (!supabase) {
+      // Mock mode: read persisted mock user if any
+      try {
+        const raw = localStorage.getItem("ecosort_mock_user");
+        if (raw) {
+          const mock = JSON.parse(raw);
+          setUser(mock as any);
+        }
+      } catch {}
       setLoading(false);
       return;
     }
