@@ -14,7 +14,8 @@ export type ClassificationResult = {
 export async function classifyWaste(file: File): Promise<ClassificationResult> {
   const API_URL =
     (import.meta as any).env?.VITE_ML_API_ENDPOINT ||
-    (typeof process !== "undefined" && (process as any)?.env?.NEXT_PUBLIC_BACKEND_URL) ||
+    (typeof process !== "undefined" &&
+      (process as any)?.env?.NEXT_PUBLIC_BACKEND_URL) ||
     "http://localhost:8000/predict"; // local fallback for dev
 
   const formData = new FormData();
@@ -29,7 +30,9 @@ export async function classifyWaste(file: File): Promise<ClassificationResult> {
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`Prediction failed (${res.status}): ${text || res.statusText}`);
+    throw new Error(
+      `Prediction failed (${res.status}): ${text || res.statusText}`,
+    );
   }
 
   const data = await res.json();
@@ -44,7 +47,9 @@ export async function classifyWaste(file: File): Promise<ClassificationResult> {
 
   return {
     type: mappedType,
-    confidence: Math.round((isNaN(backendConfidence) ? 0 : backendConfidence) * 100),
+    confidence: Math.round(
+      (isNaN(backendConfidence) ? 0 : backendConfidence) * 100,
+    ),
     processingTime: Math.round(t1 - t0),
   };
 }
@@ -68,7 +73,10 @@ function mapBackendClass(predicted: string): ClassificationResult["type"] {
 export function validateImageForClassification(file: File) {
   const allowed = ["image/jpeg", "image/png", "image/webp"];
   if (!allowed.includes(file.type)) {
-    return { isValid: false, error: "Only JPG, PNG or WEBP images are allowed." };
+    return {
+      isValid: false,
+      error: "Only JPG, PNG or WEBP images are allowed.",
+    };
   }
   // 5 MB limit
   if (file.size > 5 * 1024 * 1024) {

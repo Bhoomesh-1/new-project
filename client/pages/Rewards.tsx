@@ -20,7 +20,11 @@ import {
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth as useSbAuth, useUserProfile as useSbProfile, supabase } from "@/lib/supabase";
+import {
+  useAuth as useSbAuth,
+  useUserProfile as useSbProfile,
+  supabase,
+} from "@/lib/supabase";
 import {
   Coins,
   Gift,
@@ -39,7 +43,7 @@ import {
   Leaf,
   Sparkles,
   Heart,
-  Trophy
+  Trophy,
 } from "lucide-react";
 
 // Mock voucher data and types
@@ -65,7 +69,7 @@ interface VoucherRedemption {
   voucherId: string;
   voucherCode: string;
   pointsUsed: number;
-  status: 'active' | 'used' | 'expired';
+  status: "active" | "used" | "expired";
   redeemedAt: string;
   expiresAt: string;
   voucher?: Voucher;
@@ -74,7 +78,7 @@ interface VoucherRedemption {
 interface UserTransaction {
   id: string;
   userId: string;
-  type: 'earned' | 'redeemed' | 'bonus';
+  type: "earned" | "redeemed" | "bonus";
   points: number;
   description: string;
   metadata?: any;
@@ -83,105 +87,117 @@ interface UserTransaction {
 
 // Mock data
 const voucherCategories = {
-  food: { title: 'Food & Dining', icon: '🍕' },
-  shopping: { title: 'Shopping', icon: '🛍️' },
-  entertainment: { title: 'Entertainment', icon: '🎬' },
-  transport: { title: 'Transport', icon: '🚗' },
-  health: { title: 'Health & Wellness', icon: '💊' },
-  eco: { title: 'Eco-Friendly', icon: '🌱' }
+  food: { title: "Food & Dining", icon: "🍕" },
+  shopping: { title: "Shopping", icon: "🛍️" },
+  entertainment: { title: "Entertainment", icon: "🎬" },
+  transport: { title: "Transport", icon: "🚗" },
+  health: { title: "Health & Wellness", icon: "💊" },
+  eco: { title: "Eco-Friendly", icon: "🌱" },
 };
 
 const mockVouchers: Voucher[] = [
   {
-    id: 'v1',
-    title: '20% Off All Items',
-    brand: 'Amazon',
-    description: 'Get 20% discount on your next purchase. Valid on electronics, books, and home items.',
+    id: "v1",
+    title: "20% Off All Items",
+    brand: "Amazon",
+    description:
+      "Get 20% discount on your next purchase. Valid on electronics, books, and home items.",
     pointsRequired: 500,
-    category: 'shopping',
-    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=200&fit=crop',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg',
-    color: '#FF9900',
+    category: "shopping",
+    image:
+      "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=200&fit=crop",
+    logo: "https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg",
+    color: "#FF9900",
     validityDays: 30,
     currentStock: 50,
     isActive: true,
-    value: '₹200 OFF'
+    value: "₹200 OFF",
   },
   {
-    id: 'v2',
-    title: 'Free Coffee & Pastry',
-    brand: 'Starbucks',
-    description: 'Enjoy a complimentary coffee of your choice with a fresh pastry.',
+    id: "v2",
+    title: "Free Coffee & Pastry",
+    brand: "Starbucks",
+    description:
+      "Enjoy a complimentary coffee of your choice with a fresh pastry.",
     pointsRequired: 300,
-    category: 'food',
-    image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=200&fit=crop',
-    logo: 'https://upload.wikimedia.org/wikipedia/en/d/d3/Starbucks_Corporation_Logo_2011.svg',
-    color: '#00704A',
+    category: "food",
+    image:
+      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=200&fit=crop",
+    logo: "https://upload.wikimedia.org/wikipedia/en/d/d3/Starbucks_Corporation_Logo_2011.svg",
+    color: "#00704A",
     validityDays: 15,
     currentStock: 25,
     isActive: true,
-    value: 'FREE ITEM'
+    value: "FREE ITEM",
   },
   {
-    id: 'v3',
-    title: 'Movie Ticket BOGO',
-    brand: 'PVR Cinemas',
-    description: 'Buy one movie ticket and get one free. Valid for all shows except premieres.',
+    id: "v3",
+    title: "Movie Ticket BOGO",
+    brand: "PVR Cinemas",
+    description:
+      "Buy one movie ticket and get one free. Valid for all shows except premieres.",
     pointsRequired: 800,
-    category: 'entertainment',
-    image: 'https://images.unsplash.com/photo-1489599904472-af1a1b851186?w=400&h=200&fit=crop',
-    logo: 'https://via.placeholder.com/40x40/000000/FFFFFF?text=PVR',
-    color: '#E50914',
+    category: "entertainment",
+    image:
+      "https://images.unsplash.com/photo-1489599904472-af1a1b851186?w=400&h=200&fit=crop",
+    logo: "https://via.placeholder.com/40x40/000000/FFFFFF?text=PVR",
+    color: "#E50914",
     validityDays: 45,
     currentStock: 15,
     isActive: true,
-    value: 'BOGO'
+    value: "BOGO",
   },
   {
-    id: 'v4',
-    title: '₹100 Off Ride',
-    brand: 'Uber',
-    description: 'Get ₹100 off your next Uber ride. Valid for rides above ₹200.',
+    id: "v4",
+    title: "₹100 Off Ride",
+    brand: "Uber",
+    description:
+      "Get ₹100 off your next Uber ride. Valid for rides above ₹200.",
     pointsRequired: 200,
-    category: 'transport',
-    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&h=200&fit=crop',
-    logo: 'https://via.placeholder.com/40x40/000000/FFFFFF?text=UBER',
-    color: '#000000',
+    category: "transport",
+    image:
+      "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400&h=200&fit=crop",
+    logo: "https://via.placeholder.com/40x40/000000/FFFFFF?text=UBER",
+    color: "#000000",
     validityDays: 7,
     currentStock: 100,
     isActive: true,
-    value: '₹100 OFF'
+    value: "₹100 OFF",
   },
   {
-    id: 'v5',
-    title: 'Eco-Friendly Kit',
-    brand: 'GreenLife',
-    description: 'Complete eco-friendly starter kit with bamboo products and reusable bags.',
+    id: "v5",
+    title: "Eco-Friendly Kit",
+    brand: "GreenLife",
+    description:
+      "Complete eco-friendly starter kit with bamboo products and reusable bags.",
     pointsRequired: 1000,
-    category: 'eco',
-    image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=400&h=200&fit=crop',
-    logo: 'https://via.placeholder.com/40x40/22C55E/FFFFFF?text=GL',
-    color: '#22C55E',
+    category: "eco",
+    image:
+      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=400&h=200&fit=crop",
+    logo: "https://via.placeholder.com/40x40/22C55E/FFFFFF?text=GL",
+    color: "#22C55E",
     validityDays: 60,
     currentStock: 8,
     isActive: true,
-    value: 'FREE KIT'
+    value: "FREE KIT",
   },
   {
-    id: 'v6',
-    title: '30% Off Health Products',
-    brand: 'HealthKart',
-    description: 'Get 30% discount on all health supplements and wellness products.',
+    id: "v6",
+    title: "30% Off Health Products",
+    brand: "HealthKart",
+    description:
+      "Get 30% discount on all health supplements and wellness products.",
     pointsRequired: 600,
-    category: 'health',
-    image: 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=200&fit=crop',
-    logo: 'https://via.placeholder.com/40x40/059669/FFFFFF?text=HK',
-    color: '#059669',
+    category: "health",
+    image:
+      "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=400&h=200&fit=crop",
+    logo: "https://via.placeholder.com/40x40/059669/FFFFFF?text=HK",
+    color: "#059669",
     validityDays: 30,
     currentStock: 30,
     isActive: true,
-    value: '30% OFF'
-  }
+    value: "30% OFF",
+  },
 ];
 
 // Utility functions
@@ -197,9 +213,11 @@ const calculateVoucherValue = (voucher: Voucher): string => {
 };
 
 const canRedeemVoucher = (voucher: Voucher, userPoints: number): boolean => {
-  return voucher.isActive && 
-         userPoints >= voucher.pointsRequired && 
-         (voucher.currentStock === undefined || voucher.currentStock > 0);
+  return (
+    voucher.isActive &&
+    userPoints >= voucher.pointsRequired &&
+    (voucher.currentStock === undefined || voucher.currentStock > 0)
+  );
 };
 
 // Component for animated counter
@@ -250,7 +268,8 @@ const VoucherCard = ({
   onRedeem: (voucher: Voucher) => void;
 }) => {
   const canRedeem = canRedeemVoucher(voucher, userPoints);
-  const isLowStock = voucher.currentStock !== undefined && voucher.currentStock < 10;
+  const isLowStock =
+    voucher.currentStock !== undefined && voucher.currentStock < 10;
 
   return (
     <motion.div
@@ -292,7 +311,7 @@ const VoucherCard = ({
 
           {/* Category Icon */}
           <div className="absolute bottom-3 left-3 text-white text-2xl">
-            {voucherCategories[voucher.category]?.icon || '🎁'}
+            {voucherCategories[voucher.category]?.icon || "🎁"}
           </div>
         </div>
 
@@ -409,7 +428,7 @@ const RedeemedVoucherCard = ({
                 className="w-full h-full object-contain"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src =
-                    `https://via.placeholder.com/48x48/ffffff/000000?text=${redemption.voucher?.brand?.charAt(0) || 'V'}`;
+                    `https://via.placeholder.com/48x48/ffffff/000000?text=${redemption.voucher?.brand?.charAt(0) || "V"}`;
                 }}
               />
             </div>
@@ -494,13 +513,14 @@ export default function Rewards() {
     points: userPoints,
     waste_classified: 156,
     eco_score: 85,
-    name: "EcoWarrior"
+    name: "EcoWarrior",
   };
 
   // Filter vouchers based on selected category
-  const filteredVouchers = selectedCategory === "all"
-    ? vouchers.filter((v) => v.isActive)
-    : vouchers.filter((v) => v.category === selectedCategory && v.isActive);
+  const filteredVouchers =
+    selectedCategory === "all"
+      ? vouchers.filter((v) => v.isActive)
+      : vouchers.filter((v) => v.category === selectedCategory && v.isActive);
 
   // Handle voucher redemption
   const handleRedeemVoucher = (voucher: Voucher) => {
@@ -513,13 +533,18 @@ export default function Rewards() {
 
     setIsRedeeming(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       if (userPoints < selectedVoucher.pointsRequired) {
-        throw new Error(`Insufficient points. You need ${selectedVoucher.pointsRequired} points but only have ${userPoints}.`);
+        throw new Error(
+          `Insufficient points. You need ${selectedVoucher.pointsRequired} points but only have ${userPoints}.`,
+        );
       }
 
-      if (selectedVoucher.currentStock !== undefined && selectedVoucher.currentStock <= 0) {
+      if (
+        selectedVoucher.currentStock !== undefined &&
+        selectedVoucher.currentStock <= 0
+      ) {
         throw new Error("This voucher is currently out of stock.");
       }
 
@@ -534,19 +559,23 @@ export default function Rewards() {
         voucherId: selectedVoucher.id,
         voucherCode,
         pointsUsed: selectedVoucher.pointsRequired,
-        status: 'active',
+        status: "active",
         redeemedAt: new Date().toISOString(),
         expiresAt: expiresAt.toISOString(),
-        voucher: selectedVoucher
+        voucher: selectedVoucher,
       };
 
       const transaction: UserTransaction = {
         id: `txn_${Date.now()}`,
         userId: user?.id || "user123",
-        type: 'redeemed',
+        type: "redeemed",
         points: -selectedVoucher.pointsRequired,
         description: `Redeemed: ${selectedVoucher.title}`,
-        metadata: { voucherCode, brand: selectedVoucher.brand, category: selectedVoucher.category },
+        metadata: {
+          voucherCode,
+          brand: selectedVoucher.brand,
+          category: selectedVoucher.category,
+        },
         createdAt: new Date().toISOString(),
       };
 
@@ -554,27 +583,43 @@ export default function Rewards() {
       setTransactions((prev) => [transaction, ...prev]);
       setUserPoints((prev) => prev - selectedVoucher.pointsRequired);
 
-      setVouchers(prev => prev.map(v =>
-        v.id === selectedVoucher.id
-          ? { ...v, currentStock: (v.currentStock || 0) - 1 }
-          : v
-      ));
+      setVouchers((prev) =>
+        prev.map((v) =>
+          v.id === selectedVoucher.id
+            ? { ...v, currentStock: (v.currentStock || 0) - 1 }
+            : v,
+        ),
+      );
 
       if (supabase && user?.id) {
         try {
-          await supabase.from('user_profiles').update({ points: Math.max(0, (profile?.points || 0) - selectedVoucher.pointsRequired), updated_at: new Date().toISOString() }).eq('id', user.id);
+          await supabase
+            .from("user_profiles")
+            .update({
+              points: Math.max(
+                0,
+                (profile?.points || 0) - selectedVoucher.pointsRequired,
+              ),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", user.id);
         } catch {}
       }
 
       setIsRedeemDialogOpen(false);
       setSelectedVoucher(null);
-      toast({ title: 'Reward redeemed', description: `Code: ${voucherCode}` });
-      setSuccessMessage(`🎉 Successfully redeemed ${selectedVoucher.title}! Your voucher code: ${voucherCode}`);
+      toast({ title: "Reward redeemed", description: `Code: ${voucherCode}` });
+      setSuccessMessage(
+        `🎉 Successfully redeemed ${selectedVoucher.title}! Your voucher code: ${voucherCode}`,
+      );
       setTimeout(() => setSuccessMessage(""), 5000);
-
     } catch (error) {
       console.error("Redemption failed:", error);
-      toast({ title: 'Redemption failed', description: error instanceof Error ? error.message : 'Please try again.' });
+      toast({
+        title: "Redemption failed",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+      });
     } finally {
       setIsRedeeming(false);
     }
@@ -724,20 +769,22 @@ export default function Rewards() {
                 >
                   All Categories
                 </Button>
-                {Object.entries(voucherCategories || fallbackCategories).map(([key, category]) => (
-                  <Button
-                    key={key}
-                    variant={selectedCategory === key ? "default" : "outline"}
-                    onClick={() => setSelectedCategory(key)}
-                    className={`${
-                      selectedCategory === key
-                        ? "bg-red-600 text-white"
-                        : "bg-slate-800/50 text-gray-300 hover:text-white"
-                    }`}
-                  >
-                    {category.icon} {category.title}
-                  </Button>
-                ))}
+                {Object.entries(voucherCategories || fallbackCategories).map(
+                  ([key, category]) => (
+                    <Button
+                      key={key}
+                      variant={selectedCategory === key ? "default" : "outline"}
+                      onClick={() => setSelectedCategory(key)}
+                      className={`${
+                        selectedCategory === key
+                          ? "bg-red-600 text-white"
+                          : "bg-slate-800/50 text-gray-300 hover:text-white"
+                      }`}
+                    >
+                      {category.icon} {category.title}
+                    </Button>
+                  ),
+                )}
               </div>
 
               {/* Vouchers Grid */}
@@ -865,7 +912,9 @@ export default function Rewards() {
                                   <div className="flex items-center gap-1 text-gray-400">
                                     <Clock className="w-3 h-3" />
                                     <span>
-                                      {new Date(transaction.createdAt).toLocaleString()}
+                                      {new Date(
+                                        transaction.createdAt,
+                                      ).toLocaleString()}
                                     </span>
                                   </div>
 
@@ -884,7 +933,8 @@ export default function Rewards() {
                                 </div>
 
                                 {transaction.metadata &&
-                                  Object.keys(transaction.metadata).length > 0 && (
+                                  Object.keys(transaction.metadata).length >
+                                    0 && (
                                     <div className="mt-2 pt-2 border-t border-slate-600/30">
                                       <div className="grid grid-cols-2 gap-2 text-xs">
                                         {transaction.metadata.voucherCode && (
@@ -933,7 +983,8 @@ export default function Rewards() {
                         <div className="grid grid-cols-3 gap-4 text-sm">
                           <div className="text-center">
                             <div className="text-2xl font-bold text-green-400 mb-1">
-                              +{transactions
+                              +
+                              {transactions
                                 .filter((t) => t.type === "earned")
                                 .reduce((sum, t) => sum + t.points, 0)}
                             </div>
@@ -943,7 +994,10 @@ export default function Rewards() {
                             <div className="text-2xl font-bold text-red-400 mb-1">
                               {transactions
                                 .filter((t) => t.type === "redeemed")
-                                .reduce((sum, t) => sum + Math.abs(t.points), 0)}
+                                .reduce(
+                                  (sum, t) => sum + Math.abs(t.points),
+                                  0,
+                                )}
                             </div>
                             <p className="text-gray-400">Total Spent</p>
                           </div>
@@ -1015,7 +1069,8 @@ export default function Rewards() {
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  This action cannot be undone. Points will be deducted from your account.
+                  This action cannot be undone. Points will be deducted from
+                  your account.
                 </AlertDescription>
               </Alert>
 
