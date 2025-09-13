@@ -19,6 +19,7 @@ import {
   Target,
   TrendingUp,
   Bell,
+  ShoppingBag,
 } from "lucide-react";
 import { useAuth as useSbAuth, useUserProfile, mockData } from "@/lib/supabase";
 import { useAuth as useAppAuth } from "../App";
