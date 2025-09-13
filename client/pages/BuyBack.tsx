@@ -25,7 +25,7 @@ export default function BuyBackPage() {
   const submit = async () => {
     await createBuybackOrder({ user_id: user?.id || 'mock-user-1', material_type: material, weight_kg: weight });
     await load();
-    alert(`Order placed. Quote: ₹${quote}`);
+    toast({ title: 'Order created', description: `Quote: ₹${quote}` });
   };
 
   return (
