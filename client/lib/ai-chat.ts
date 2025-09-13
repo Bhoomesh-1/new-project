@@ -7,7 +7,7 @@ export async function getAIReply(userText: string, context?: string): Promise<st
       { role: 'user' as const, content: userText }
     ]
   };
-  const resp = await fetch(`${app.apiBaseUrl}/ai-chat`, {
+  const resp = await fetch(`/api/ai-chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
