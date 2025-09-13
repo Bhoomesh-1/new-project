@@ -19,7 +19,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
+import { useToast } from "@/hooks/use-toast";
+import { useAuth as useSbAuth, useUserProfile as useSbProfile, supabase } from "@/lib/supabase";
+import {
   Coins,
   Gift,
   Star,
@@ -37,7 +39,7 @@ import {
   Leaf,
   Sparkles,
   Heart,
-  Trophy 
+  Trophy
 } from "lucide-react";
 
 // Mock voucher data and types
@@ -475,9 +477,17 @@ export default function Rewards() {
   const [redemptions, setRedemptions] = useState<VoucherRedemption[]>([]);
   const [transactions, setTransactions] = useState<UserTransaction[]>([]);
   const [isRedeeming, setIsRedeeming] = useState(false);
-  const [userPoints, setUserPoints] = useState(2500); // Mock user points
+  const [userPoints, setUserPoints] = useState(0);
   const [vouchers, setVouchers] = useState<Voucher[]>(mockVouchers);
   const [successMessage, setSuccessMessage] = useState<string>("");
+  const { toast } = useToast();
+  const { user } = useSbAuth();
+  const { profile } = useSbProfile(user?.id);
+
+  useEffect(() => {
+    if (profile?.points != null) setUserPoints(profile.points);
+    if (!profile) setUserPoints(2500);
+  }, [profile]);
 
   // Mock user data
   const userData = {
@@ -503,32 +513,26 @@ export default function Rewards() {
 
     setIsRedeeming(true);
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Check if user has enough points
       if (userPoints < selectedVoucher.pointsRequired) {
         throw new Error(`Insufficient points. You need ${selectedVoucher.pointsRequired} points but only have ${userPoints}.`);
       }
 
-      // Check stock
       if (selectedVoucher.currentStock !== undefined && selectedVoucher.currentStock <= 0) {
         throw new Error("This voucher is currently out of stock.");
       }
 
-      // Generate unique voucher code
-      const voucherCode = generateVoucherCode(selectedVoucher.brand);
-      
-      // Calculate expiry date
+      const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
+      const voucherCode = `ECO-${rand}`;
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + selectedVoucher.validityDays);
 
-      // Create redemption record
       const redemption: VoucherRedemption = {
         id: `red_${Date.now()}`,
-        userId: "user123",
+        userId: user?.id || "user123",
         voucherId: selectedVoucher.id,
-        voucherCode: voucherCode,
+        voucherCode,
         pointsUsed: selectedVoucher.pointsRequired,
         status: 'active',
         redeemedAt: new Date().toISOString(),
@@ -536,43 +540,41 @@ export default function Rewards() {
         voucher: selectedVoucher
       };
 
-      // Create transaction record
       const transaction: UserTransaction = {
         id: `txn_${Date.now()}`,
-        userId: "user123",
+        userId: user?.id || "user123",
         type: 'redeemed',
         points: -selectedVoucher.pointsRequired,
         description: `Redeemed: ${selectedVoucher.title}`,
-        metadata: { 
-          voucherCode: voucherCode,
-          brand: selectedVoucher.brand,
-          category: selectedVoucher.category 
-        },
+        metadata: { voucherCode, brand: selectedVoucher.brand, category: selectedVoucher.category },
         createdAt: new Date().toISOString(),
       };
 
-      // Update state
       setRedemptions((prev) => [redemption, ...prev]);
       setTransactions((prev) => [transaction, ...prev]);
       setUserPoints((prev) => prev - selectedVoucher.pointsRequired);
 
-      // Update voucher stock
-      setVouchers(prev => prev.map(v => 
-        v.id === selectedVoucher.id 
+      setVouchers(prev => prev.map(v =>
+        v.id === selectedVoucher.id
           ? { ...v, currentStock: (v.currentStock || 0) - 1 }
           : v
       ));
 
+      if (supabase && user?.id) {
+        try {
+          await supabase.from('user_profiles').update({ points: Math.max(0, (profile?.points || 0) - selectedVoucher.pointsRequired), updated_at: new Date().toISOString() }).eq('id', user.id);
+        } catch {}
+      }
+
       setIsRedeemDialogOpen(false);
       setSelectedVoucher(null);
+      toast({ title: 'Reward redeemed', description: `Code: ${voucherCode}` });
       setSuccessMessage(`🎉 Successfully redeemed ${selectedVoucher.title}! Your voucher code: ${voucherCode}`);
-      
-      // Clear success message after 5 seconds
       setTimeout(() => setSuccessMessage(""), 5000);
 
     } catch (error) {
       console.error("Redemption failed:", error);
-      alert(error instanceof Error ? error.message : "Redemption failed. Please try again.");
+      toast({ title: 'Redemption failed', description: error instanceof Error ? error.message : 'Please try again.' });
     } finally {
       setIsRedeeming(false);
     }
