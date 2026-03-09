@@ -1,7 +1,18 @@
-import { supabase } from './supabase';
+import { supabase } from "./supabase";
 
-export type WasteType = 'e-waste' | 'hazardous' | 'bulk' | 'other' | 'biodegradable' | 'recyclable';
-export type PickupStatus = 'requested' | 'scheduled' | 'collected' | 'missed' | 'cancelled';
+export type WasteType =
+  | "e-waste"
+  | "hazardous"
+  | "bulk"
+  | "other"
+  | "biodegradable"
+  | "recyclable";
+export type PickupStatus =
+  | "requested"
+  | "scheduled"
+  | "collected"
+  | "missed"
+  | "cancelled";
 
 export interface Pickup {
   id: string;
@@ -19,7 +30,7 @@ export interface Pickup {
   updated_at: string;
 }
 
-const LS_KEY = 'ecosort_pickups_local';
+const LS_KEY = "ecosort_pickups_local";
 
 function readLocal(): Pickup[] {
   try {
@@ -36,8 +47,13 @@ function writeLocal(list: Pickup[]) {
   } catch {}
 }
 
-export async function createPickup(input: Omit<Pickup, 'id'|'status'|'created_at'|'updated_at'|'user_id'> & { user_id: string }): Promise<Pickup> {
-  const payload: Omit<Pickup, 'id'> = {
+export async function createPickup(
+  input: Omit<
+    Pickup,
+    "id" | "status" | "created_at" | "updated_at" | "user_id"
+  > & { user_id: string },
+): Promise<Pickup> {
+  const payload: Omit<Pickup, "id"> = {
     user_id: input.user_id,
     worker_id: null,
     name: input.name,
@@ -47,7 +63,7 @@ export async function createPickup(input: Omit<Pickup, 'id'|'status'|'created_at
     waste_type: input.waste_type,
     pickup_date: input.pickup_date,
     description: input.description,
-    status: 'requested',
+    status: "scheduled",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
@@ -62,9 +78,9 @@ export async function createPickup(input: Omit<Pickup, 'id'|'status'|'created_at
   }
 
   const { data, error } = await supabase
-    .from('pickups')
+    .from("pickups")
     .insert(payload)
-    .select('*')
+    .select("*")
     .single();
   if (error) throw error;
   return data as Pickup;
@@ -72,30 +88,39 @@ export async function createPickup(input: Omit<Pickup, 'id'|'status'|'created_at
 
 export async function listUserPickups(userId: string): Promise<Pickup[]> {
   if (!supabase) {
-    return readLocal().filter(p => p.user_id === userId).sort((a,b)=>b.created_at.localeCompare(a.created_at));
+    return readLocal()
+      .filter((p) => p.user_id === userId)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
   }
   const { data, error } = await supabase
-    .from('pickups')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+    .from("pickups")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
   if (error) throw error;
   return (data || []) as Pickup[];
 }
 
-export async function updatePickupStatus(id: string, status: PickupStatus): Promise<void> {
+export async function updatePickupStatus(
+  id: string,
+  status: PickupStatus,
+): Promise<void> {
   if (!supabase) {
     const list = readLocal();
-    const idx = list.findIndex(p => p.id === id);
+    const idx = list.findIndex((p) => p.id === id);
     if (idx >= 0) {
-      list[idx] = { ...list[idx], status, updated_at: new Date().toISOString() };
+      list[idx] = {
+        ...list[idx],
+        status,
+        updated_at: new Date().toISOString(),
+      };
       writeLocal(list);
     }
     return;
   }
   const { error } = await supabase
-    .from('pickups')
+    .from("pickups")
     .update({ status, updated_at: new Date().toISOString() })
-    .eq('id', id);
+    .eq("id", id);
   if (error) throw error;
 }

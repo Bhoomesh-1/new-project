@@ -19,6 +19,7 @@ import {
   Target,
   TrendingUp,
   Bell,
+  ShoppingBag,
 } from "lucide-react";
 import { useAuth as useSbAuth, useUserProfile, mockData } from "@/lib/supabase";
 import { useAuth as useAppAuth } from "../App";
@@ -76,6 +77,18 @@ const navigationItems = [
     href: "/buyback",
     icon: Coins,
     description: "Sell recyclables",
+  },
+  {
+    title: "Marketplace",
+    href: "/marketplace",
+    icon: ShoppingBag,
+    description: "Second-hand items",
+  },
+  {
+    title: "Sell Item",
+    href: "/sell-item",
+    icon: TrendingUp,
+    description: "List your item",
   },
   {
     title: "Eco-Points & Rewards",
